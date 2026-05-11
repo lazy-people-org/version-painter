@@ -1,6 +1,6 @@
 {
     "name": "version-painter",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Vite 插件：构建时写入版本脚本并向 HTML 注入构建信息 meta",
     "license": "MIT",
     "keywords": [

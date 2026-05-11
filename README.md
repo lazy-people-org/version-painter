@@ -2,6 +2,21 @@
 
 面向 Vite 的小插件：在构建时写入版本脚本（`window.version` / `window.__BUILD_INFO__`），并向 HTML 注入用于核对构建信息的 `<meta>`。
 
+**当前 npm 版本：`0.0.2`**
+
+## 更新日志
+
+### 0.0.2
+
+- 补充 **README**（用法、选项表、GitHub Actions 说明）、**MIT LICENSE**，并在发布包中包含文档与许可证。
+- 关闭 JS / d.ts 的 **source map** 输出，减小发包体积。
+- **GitHub Actions**：增加版本门禁——推送至 `dev` 时若 `package.json` 版本与 npm 最新版相同则跳过整次 CI；Pull Request 仍始终完整构建。
+- 持续集成通过后在版本有更新时自动 **`npm publish`**（需配置 `NPM_TOKEN`）。
+
+### 0.0.1
+
+- 初始发布：`projectInfoHook` 插件、`window.version` / `window.__BUILD_INFO__`、HTML meta 注入等能力。
+
 ## 特性
 
 - 构建开始时生成指定路径下的 `version.js`（可配置）
