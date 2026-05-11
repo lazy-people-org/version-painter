@@ -1,0 +1,36 @@
+name: 持续集成
+
+on:
+    push:
+        branches: [main, master]
+    pull_request:
+        branches: [main, master]
+
+jobs:
+    build:
+        name: 类型检查与构建
+        runs-on: ubuntu-latest
+        steps:
+            - name: 检出仓库
+              uses: actions/checkout@v4
+
+            - name: 使用 Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: npm
+
+            - name: 安装依赖
+              run: npm ci
+
+            - name: TypeScript 检查
+              run: npm run typecheck
+
+            - name: 构建库产物
+              run: npm run build
+
+            - name: 校验 dist（供 TS / ESM JS 引用）
+              run: |
+                  test -f dist/index.js
+                  test -f dist/index.d.ts
+                  node --input-type=module -e "import('./dist/index.js').then(m => { if (typeof m.projectInfoHook !== 'function') process.exit(1); })"

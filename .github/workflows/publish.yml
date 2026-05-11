@@ -1,0 +1,38 @@
+name: 发布 npm 包
+
+on:
+    release:
+        types: [published]
+    workflow_dispatch:
+
+jobs:
+    publish:
+        name: 构建并发布
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - name: 检出仓库
+              uses: actions/checkout@v4
+
+            - name: 使用 Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  registry-url: https://registry.npmjs.org
+                  cache: npm
+
+            - name: 安装依赖
+              run: npm ci
+
+            - name: TypeScript 检查
+              run: npm run typecheck
+
+            - name: 构建库产物
+              run: npm run build
+
+            - name: 发布至 npm
+              run: npm publish --provenance --access public
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

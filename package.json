@@ -1,0 +1,31 @@
+{
+    "name": "version-painter",
+    "version": "0.0.1",
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "types": "./dist/index.d.ts",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "vite build && tsc -p tsconfig.build.json",
+        "dev": "vite --config playground/vite.config.ts",
+        "preview": "vite preview --config playground/vite.config.ts",
+        "typecheck": "tsc --noEmit"
+    },
+    "peerDependencies": {
+        "vite": "^6.0.0 || ^7.0.0 || ^8.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.15.21",
+        "typescript": "^5.8.3",
+        "vite": "^8.0.11"
+    }
+}
