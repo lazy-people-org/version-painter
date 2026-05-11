@@ -13,6 +13,6 @@ export default defineConfig({
             external: id => id === 'vite' || id.startsWith('node:') || id.startsWith('vite/'),
         },
         emptyOutDir: true,
-        sourcemap: true,
+        sourcemap: false,
     },
 });
