@@ -8,8 +8,56 @@ on:
     workflow_dispatch:
 
 jobs:
+    version_gate:
+        name: 版本检查
+        runs-on: ubuntu-latest
+        outputs:
+            skip_ci: ${{ steps.compare.outputs.skip_ci }}
+        steps:
+            - name: 检出仓库
+              uses: actions/checkout@v4
+
+            - name: 使用 Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+
+            - name: 比对 package.json 与 npm 最新版本
+              id: compare
+              run: |
+                  set -e
+                  if [ "${{ github.event_name }}" = "pull_request" ]; then
+                    echo "Pull Request：始终执行完整 CI（不因版本未变而跳过）。"
+                    echo "skip_ci=false" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+
+                  NAME=$(node -p "require('./package.json').name")
+                  LOCAL=$(node -p "require('./package.json').version")
+                  REMOTE=$(npm view "$NAME" version 2>/dev/null || true)
+
+                  echo "包名: $NAME"
+                  echo "package.json 版本: $LOCAL"
+                  echo "npm 最新版本: ${REMOTE:-（未发布或无法查询）}"
+
+                  if [ -z "$REMOTE" ]; then
+                    echo "npm 上暂无已发布版本或查询为空，继续执行 CI。"
+                    echo "skip_ci=false" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+
+                  if [ "$LOCAL" = "$REMOTE" ]; then
+                    echo "::notice title=跳过 CI::package.json 版本 ($LOCAL) 与 npm 最新版一致，未检测到版本升级。本次不执行构建与发布。"
+                    echo "skip_ci=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "版本已相对 npm 更新（本地 $LOCAL ≠ npm $REMOTE），继续执行 CI。"
+                    echo "skip_ci=false" >> "$GITHUB_OUTPUT"
+                  fi
+
     build:
         name: 类型检查与构建
+        needs: version_gate
+        if: needs.version_gate.outputs.skip_ci != 'true'
         runs-on: ubuntu-latest
         steps:
             - name: 检出仓库
@@ -38,10 +86,9 @@ jobs:
 
     publish:
         name: 发布至 npm
-        needs: build
+        needs: [version_gate, build]
+        if: needs.version_gate.outputs.skip_ci != 'true' && github.event_name != 'pull_request'
         runs-on: ubuntu-latest
-        # PR 仅跑 build；推送到 dev 或手动 workflow_dispatch 时在 build 成功后发布
-        if: github.event_name != 'pull_request'
         steps:
             - name: 检出仓库
               uses: actions/checkout@v4

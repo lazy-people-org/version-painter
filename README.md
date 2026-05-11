@@ -73,9 +73,9 @@ npm run dev
 
 ## GitHub Actions
 
-- **Pull Request**：仅执行类型检查与构建，**不会**发布到 npm。
-- **推送到 `dev`**：构建成功后自动执行 **`npm publish`**。发版前请先提升 **`package.json` 的 `version`**（同一版本不可重复发布）；仓库需配置 Secret **`NPM_TOKEN`**（建议使用 npm 的 Automation / Granular 发布令牌，避免 CI 要求 OTP）。
-- 可在 Actions 中 **手动运行**同一工作流（`workflow_dispatch`），同样在构建通过后发布。
+- **Pull Request**：始终执行完整 CI（类型检查、构建），**不因版本未变而跳过**；**不会**发布到 npm。
+- **推送到 `dev` / 手动 `workflow_dispatch`**：先比对 **`package.json` 的 `version`** 与 **npm 上该包最新版本**。若相同（未升版本），则 **跳过本次全部 CI（含构建与发布）**，并在「版本检查」作业中输出说明；若 npm 尚无该包或查不到版本，则照常执行 CI。版本有变化时构建通过后执行 **`npm publish`**。
+- 仓库需配置 Secret **`NPM_TOKEN`**（建议使用 npm 的 Automation / Granular 发布令牌，避免 CI 要求 OTP）。
 
 ## 许可证
 
